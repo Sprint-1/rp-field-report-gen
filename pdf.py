@@ -3,7 +3,7 @@ import sys
 import zipfile
 import tempfile
 import re
-from PIL import Image, ImageDraw, ImageFont, ImageOps
+from PIL import Image, ImageDraw, ImageFont, ImageOps, UnidentifiedImageError
 from pillow_heif import register_heif_opener
 import piexif
 from datetime import datetime
@@ -30,7 +30,7 @@ def get_date_taken(img_path):
                 date_str = exif_dict['Exif'].get(piexif.ExifIFD.DateTimeOriginal)
                 if date_str:
                     return datetime.strptime(date_str.decode(), "%Y:%m:%d %H:%M:%S")
-    except Exception as e:
+    except Exception:
         pass
     return None
 
@@ -82,15 +82,24 @@ def create_contact_sheet_pdf_from_folder(folder_path, output_pdf, thumb_width=20
     thumbs = []
     labels = []
     for (file, img_path, dt) in files_info:
-        img = Image.open(img_path)
-        thumb = ImageOps.pad(img, (thumb_width, thumb_height), color='white')
-        if thumb.mode in ("RGBA", "P"):
-            thumb = thumb.convert("RGB")
-        thumbs.append(thumb)
+        try:
+            img = Image.open(img_path)
+            thumb = ImageOps.pad(img, (thumb_width, thumb_height), color='white')
+            if thumb.mode in ("RGBA", "P"):
+                thumb = thumb.convert("RGB")
+            thumbs.append(thumb)
 
-        date_label = dt.strftime("%Y-%m-%d %H:%M:%S") if dt else "No date"
-        labels.append(date_label)
-        print(f"Adding to PDF: {file} - Date Taken: {date_label}")
+            date_label = dt.strftime("%Y-%m-%d %H:%M:%S") if dt else "No date"
+            labels.append(date_label)
+            print(f"Adding to PDF: {file} - Date Taken: {date_label}")
+        except UnidentifiedImageError:
+            print(f"⚠️ Skipping file '{file}' — cannot identify image format.")
+        except Exception as e:
+            print(f"⚠️ Skipping file '{file}' due to error: {e}")
+
+    if not thumbs:
+        print("No valid images to add to PDF.")
+        return
 
     pages = []
     i = 0
