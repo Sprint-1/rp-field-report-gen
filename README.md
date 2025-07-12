@@ -1,0 +1,4 @@
+- Create Virtual Environment `python -m venv .venv`
+- Activate Virtual Environment `.venv\Scripts\activate`
+- `pip install pillow pillow-heif piexif`
+- Run `python pdf.py "C:\Path\To\Job.zip"`
