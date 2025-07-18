@@ -20,3 +20,12 @@ temp/
 
 # Ignore logs
 *.log
+build/pdf/Analysis-00.toc
+build/pdf/base_library.zip
+build/pdf/EXE-00.toc
+build/pdf/pdf.pkg
+build/pdf/PKG-00.toc
+build/pdf/PYZ-00.pyz
+build/pdf/PYZ-00.toc
+build/pdf/warn-pdf.txt
+build/pdf/xref-pdf.html
